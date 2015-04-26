@@ -10,8 +10,8 @@ livereload = require 'gulp-livereload'
 
 config =
   source:
-    main: './app/source/index.coffee'
-    files: './app/source/**/*.coffee'
+    main: './app/source/index.cjsx'
+    files: './app/source/**/*.{coffee,cjsx}'
   style:
     main: './app/styles/index.scss'
     files: './app/styles/**/*.scss'
@@ -26,12 +26,11 @@ gulp.task 'build', ['source-build', 'style-build', 'document-build']
 
 gulp.task 'source-build', ->
   gulp.src(config.source.main, { read: false })
-    .pipe sourcemaps.init()
     .pipe browserify
       transform: ['coffee-reactify']
       extensions: ['.coffee', '.cjsx']
+    .on 'error', util.log
     .pipe rename 'index.js'
-    .pipe sourcemaps.write()
     .pipe gulp.dest config.other.outdir
     .pipe livereload()
       
@@ -40,7 +39,8 @@ gulp.task 'style-build', ->
   gulp.src(config.style.main)
     .pipe sourcemaps.init()
     .pipe sass()
-    .pipe sourcemaps.write()
+    .on 'error', util.log
+    .pipe sourcemaps.write('.')
     .pipe gulp.dest config.other.outdir
     .pipe livereload()
 
