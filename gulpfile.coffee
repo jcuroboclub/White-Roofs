@@ -28,8 +28,8 @@ gulp.task 'source-build', ->
   gulp.src(config.source.main, { read: false })
     .pipe sourcemaps.init()
     .pipe browserify
-      transform: ['coffeeify']
-      extensions: ['.coffee']
+      transform: ['coffee-reactify']
+      extensions: ['.coffee', '.cjsx']
     .pipe rename 'index.js'
     .pipe sourcemaps.write()
     .pipe gulp.dest config.other.outdir

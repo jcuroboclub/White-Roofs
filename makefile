@@ -25,6 +25,7 @@ serve:
 init:
 	$(call npm-check, gulp,  gulp)
 	$(call npm-check, coffee, coffee-script)
+	$(call npm-check, cjsx, coffee-react)
 	@mkdir -p dist
 	npm install
 
