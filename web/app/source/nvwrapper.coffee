@@ -3,23 +3,7 @@ $ = require 'jquery'
 require 'nvd3/build/nv.d3.js'
 
 
-duration = 1000
-
-
 parseDateStr = d3.time.format.utc('%Y-%m-%dT%H:%M:%SZ').parse
-
-
-redraw = (target, chart, data) ->
-  d3.select(target).datum(data).call chart
-
-
-getNvChart = (name) ->
-  chart = nv.models[name]()
-  chart = chart.useInteractiveGuideline?(true) ? chart
-  chart.xAxis.axisLabel('Time').tickFormat (d) -> d3.time.format('%H:%M') new Date(d)
-  chart.yAxis.axisLabel('Temp (C)').tickFormat d3.format('.1f')
-  nv.utils.windowResize(chart.update)
-  return chart
 
 
 getColor = (name) ->
@@ -67,10 +51,12 @@ exports.getChartOfType = (target, name) ->
       new ChartDrawer target, chart
 
 
-
-
 ChartDrawer = class ChartDrawer
   
+
+  redraw: (data) ->
+    d3.select(@target).datum(data).call @chart
+
   withinCapacity: (n) -> n
 
   __TS_FIELDS: do ((n) -> ('field' + n) for n in [1..8])
@@ -90,7 +76,7 @@ ChartDrawer = class ChartDrawer
     last = field1.values[field1.values.length-1]
     if last isnt @oldlast # if updated
       @oldlast = last
-      redraw @target, @chart, newdata
+      @redraw newdata
 
 
 BarChartDrawer = class BarChartDrawer extends ChartDrawer
@@ -108,7 +94,7 @@ BarChartDrawer = class BarChartDrawer extends ChartDrawer
   drawChart: (data) ->
     newdata = @__structure(data)
     console.log newdata
-    redraw @target, @chart, newdata
+    @redraw newdata
 
 
 EggChartDrawer = class EggChartDrawer
