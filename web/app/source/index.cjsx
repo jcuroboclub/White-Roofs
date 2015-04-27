@@ -24,7 +24,7 @@ ChannelGraph = React.createClass
   interval: (target) ->
     chart = nv.getChartOfType target, @props.chartType
     return =>
-      amount = chart.withinCapacity 500
+      amount = chart.withinCapacity 200
       thinkspeak.get @props.channel, amount, (response) =>
         if @state.title != response.channel.name
           @setState { title: response.channel.name }
@@ -42,6 +42,8 @@ Main = React.createClass
 
   render: ->
     <div className="container">
+      <ChannelGraph channel={35686} chartType="egg"/>
+
       <ChannelGraph channel={35686} chartType="roofBarChart"/>
       <ChannelGraph channel={35686} chartType="roofLineChart"/>
       <ChannelGraph channel={35687} chartType="roofBarChart"/>

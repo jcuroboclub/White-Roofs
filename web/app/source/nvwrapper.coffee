@@ -56,13 +56,14 @@ exports.getChartOfType = (target, name) ->
 
 ChartDrawer = class ChartDrawer
 
-  redraw: (data) ->
-    d3.select(@target).datum(data).call @chart
-
-  withinCapacity: (n) -> n
-
   constructor: (@target, @chart) ->
     @oldlast = 0
+
+  #
+  # withinCapacity basically will take a number of rows,
+  # and trim it by the max capacity
+  #
+  withinCapacity: (n) -> n
 
   __structure: (data) ->
     for f in __TS_FIELDS
@@ -76,11 +77,15 @@ ChartDrawer = class ChartDrawer
     last = field1.values[field1.values.length-1]
     if last isnt @oldlast # if updated
       @oldlast = last
-      @redraw newdata
+      d3.select(@target).datum(newdata).call @chart
 
 
 BarChartDrawer = class BarChartDrawer extends ChartDrawer
 
+  #
+  # because the bar chart only wants 1 row, it doesn't
+  # care about parameters, and just returns 1
+  #
   withinCapacity: -> 1
 
   __structure: (data) ->
@@ -93,7 +98,7 @@ BarChartDrawer = class BarChartDrawer extends ChartDrawer
 
   drawChart: (data) ->
     newdata = @__structure(data)
-    @redraw newdata
+    d3.select(@target).datum(newdata).call @chart
 
 
 EggChartDrawer = class EggChartDrawer
@@ -101,55 +106,48 @@ EggChartDrawer = class EggChartDrawer
   constructor: (target) ->
     @svg = d3.select(target)
 
+  #
+  # because the bar chart only wants 1 row, it doesn't
+  # care about parameters, and just returns 1
+  #
   withinCapacity: -> 1
 
   #
-  # TODO combine __format_layer_2 & __format_layer_1 into a sensible function
+  # parse an amount of px's like `250px' to `250'
   #
-
-  parsePx: (s) ->
+  __parsePx: (s) ->
     parseInt s.substr(0, s.length - 2), 10
 
-  __format_layer_2: (data) ->
+  __structure: (data) ->
     for f in __TS_FIELDS
-      key: data.channel[f]
-      values:
-        (x: parseDateStr(d.created_at), y: parseFloat(d[f]) for d in data.feeds)
-
-  __format_layer_1: (data) ->
-    newData = [{ key: 'all', values: []}]
-    console.log data
-    for attribute in @__format_layer_2 data
-      newData[0].values.push
-        label: attribute.key
-        value: attribute.values[0].y
-    return newData[0].values
+      label: data.channel[f]
+      value: (parseFloat(d[f]) for d in data.feeds)[0]
 
   drawChart: (data) ->
-    formatted = @__format_layer_1 data
+    formatted = @__structure data
 
     circle = @svg.selectAll('image').data(formatted)
-    text = @svg.selectAll('text').data(formatted)
+    text   = @svg.selectAll('text').data(formatted)
 
-    radius = @parsePx(@svg.style('height')) / 4.75
-    width = @parsePx(@svg.style 'width') - radius*3
+    radius = @__parsePx(@svg.style('height')) / 4.75
+    width  = @__parsePx(@svg.style 'width') - radius*3
 
     circle.enter().append('image')
-      .attr "y", (@parsePx(@svg.style('height')) / 2) - radius
+      .attr "y", (@__parsePx(@svg.style('height')) / 2) - (radius * 1.25)
       .attr "x", (d, i) =>
         (radius*1.5 + (i * (width / (formatted.length-1)))) - radius
       .attr "width", radius * 2
       .attr "height", radius * 2
       .attr "xlink:href","http://www.cs.utah.edu/~maljovec/CS6640/project4/images/checker32-seg.gif" 
-      .style "", radius
 
     text.enter().append('text')
-      .attr "y", @parsePx(@svg.style('height')) * 8
+      .attr "y", @__parsePx(@svg.style('height')) * 0.8
       .attr "x", (d, i) =>
-        (radius*1.5 + (i * (width / (formatted.length-1)))) - radius
-      .attr("font-family", "sans-serif")
-      .attr("font-size", "20px")
-      .attr("fill", "red")
+        radius * 1.5 + (i * (width / (formatted.length-1)))
+      .attr("font-family", "PT Sans")
+      .attr("font-size", "16px")
+      .attr("text-anchor", 'middle')
+      .attr("fill", "#333")
       .text (d) -> d.label
 
     circle.exit().remove()
