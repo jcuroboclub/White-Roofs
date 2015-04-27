@@ -15,13 +15,15 @@ config =
   style:
     main: './app/styles/index.scss'
     files: './app/styles/**/*.scss'
+  image:
+    files: './app/img/**/*.png'
   html:
     files: './app/index.html'
   other:
     outdir: './dist'
 
 
-gulp.task 'build', ['source-build', 'style-build', 'document-build']
+gulp.task 'build', ['source-build', 'style-build', 'document-build', 'image-build']
 
 
 gulp.task 'source-build', ->
@@ -31,9 +33,9 @@ gulp.task 'source-build', ->
       extensions: ['.coffee', '.cjsx']
     .on 'error', util.log
     .pipe rename 'index.js'
-    .pipe gulp.dest config.other.outdir
+    .pipe gulp.dest "#{config.other.outdir}/js"
     .pipe livereload()
-      
+
 
 gulp.task 'style-build', ->
   gulp.src(config.style.main)
@@ -41,7 +43,13 @@ gulp.task 'style-build', ->
     .pipe sass()
     .on 'error', util.log
     .pipe sourcemaps.write('.')
-    .pipe gulp.dest config.other.outdir
+    .pipe gulp.dest "#{config.other.outdir}/css"
+    .pipe livereload()
+
+
+gulp.task 'image-build', ->
+  gulp.src(config.image.files)
+    .pipe gulp.dest "#{config.other.outdir}/img"
     .pipe livereload()
 
 
@@ -54,11 +62,12 @@ gulp.task 'document-build', ->
 
 
 gulp.task 'watch', ['build'], ->
-  livereload.listen 
+  livereload.listen
     port: 12345
     basePath: config.other.outdir
   gulp.watch config.source.files, ['source-build']
   gulp.watch config.style.files, ['style-build']
+  gulp.watch config.image.files, ['image-build']
   gulp.watch config.html.files, ['document-build']
 
 

@@ -138,7 +138,18 @@ EggChartDrawer = class EggChartDrawer
         (radius*1.5 + (i * (width / (formatted.length-1)))) - radius
       .attr "width", radius * 2
       .attr "height", radius * 2
-      .attr "xlink:href","http://www.cs.utah.edu/~maljovec/CS6640/project4/images/checker32-seg.gif" 
+      .attr "xlink:href", (d) ->
+        #
+        # eggcellent
+        #
+        switch
+          when d.value > 75 then '/img/egg1.png'
+          when d.value > 72 then '/img/egg2.png'
+          when d.value > 68 then '/img/egg3.png'
+          when d.value > 64 then '/img/egg4.png'
+          when d.value > 60 then '/img/egg5.png'
+          else '/img/egg6.png'
+
 
     text.enter().append('text')
       .attr "y", @__parsePx(@svg.style('height')) * 0.8
