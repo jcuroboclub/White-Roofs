@@ -14,4 +14,3 @@ class ArduinoSerial:
 
     def receiveMsg(self):
         return self.port.readline()
-
