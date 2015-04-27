@@ -14,20 +14,19 @@ ChannelGraph = React.createClass
     title: 'loading'
 
   componentDidMount: ->
-    onInterval = @interval
-      svgNode: @refs.visualisation.getDOMNode()
-      context: this
-      channel: @props.channel
-      chart: nv.getChart @props.chartType
+    onInterval = @interval @refs.visualisation.getDOMNode()
     onInterval()
     setInterval onInterval, 16000
 
-  interval: (config) -> 
-    ->
-      thinkspeak.get config.channel, 10, (response) ->
-        if config.context.state.title != response.channel.name
-          config.context.setState { title: response.channel.name }
-        nv.drawChart config.svgNode, response, config.chart 
+  interval: (target) -> 
+    chart = nv.getChartOfType target, @props.chartType
+    =>
+      amount = chart.withinCapacity 100
+      thinkspeak.get @props.channel, amount, (response) =>
+        console.log response
+        if @state.title != response.channel.name
+          @setState { title: response.channel.name }
+        chart.drawChart response
 
   render: ->
     <div className="visualisation">
@@ -41,8 +40,8 @@ Main = React.createClass
 
   render: ->
     <div className="container">
-      <ChannelGraph channel={35686} chartType="historicalBarChart"/>
-      <ChannelGraph channel={35687} chartType="historicalBarChart"/>
+      <ChannelGraph channel={35686} chartType="roof"/>
+      <ChannelGraph channel={35687} chartType="roof"/>
       <ChannelGraph channel={35688} chartType="lineChart"/>
     </div>
 
