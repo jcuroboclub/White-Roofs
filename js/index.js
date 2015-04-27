@@ -314,17 +314,17 @@ EggChartDrawer = EggChartDrawer = (function() {
     })(this)).attr("width", radius * 2).attr("height", radius * 2).attr("xlink:href", function(d) {
       switch (false) {
         case !(d.value > 75):
-          return '/img/egg1.png';
+          return './img/egg1.png';
         case !(d.value > 72):
-          return '/img/egg2.png';
+          return './img/egg2.png';
         case !(d.value > 68):
-          return '/img/egg3.png';
+          return './img/egg3.png';
         case !(d.value > 64):
-          return '/img/egg4.png';
+          return './img/egg4.png';
         case !(d.value > 60):
-          return '/img/egg5.png';
+          return './img/egg5.png';
         default:
-          return '/img/egg6.png';
+          return './img/egg6.png';
       }
     });
     text.enter().append('text').attr("y", this.__parsePx(this.svg.style('height')) * 0.8).attr("x", (function(_this) {
