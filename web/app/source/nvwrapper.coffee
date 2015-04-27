@@ -16,17 +16,21 @@ redraw = (target, chart, data) ->
   d3.select(target).datum(data).call chart
 
 
-exports.lineChart = do ->
-  chart = nv.models.lineChart().useInteractiveGuideline(true)
+exports.getChart = (name) ->
+  console.log name
+  console.log nv.models
+  chart = nv.models[name]()
+  chart = chart.useInteractiveGuideline?(true) ? chart
   chart.xAxis.axisLabel('Time').tickFormat (d) -> d3.time.format('%H:%M') new Date(d)
   chart.yAxis.axisLabel('Temp (C)').tickFormat d3.format('.1f')
   nv.utils.windowResize(chart.update)
-  console.log chart
   return chart
 
 
+
+
+
 toNv = (tsData) ->
-  console.log tsData
   for f in TS_FIELDS
     key: (tsData.channel[f])
     values:
@@ -38,7 +42,6 @@ oldlast = 0
 
 exports.drawChart = (target, newdata, chart) ->
   newdata = toNv(newdata)
-  console.log(newdata)
   field1 = newdata[1]
   last = field1.values[field1.values.length-1]
   if last isnt oldlast # if updated

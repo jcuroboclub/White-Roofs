@@ -8,7 +8,7 @@ nv = require './nvwrapper'
 
 
 
-ChannelLineGraph = React.createClass
+ChannelGraph = React.createClass
 
   getInitialState: ->
     title: 'loading'
@@ -18,14 +18,16 @@ ChannelLineGraph = React.createClass
       svgNode: @refs.visualisation.getDOMNode()
       context: this
       channel: @props.channel
+      chart: nv.getChart @props.chartType
     onInterval()
     setInterval onInterval, 16000
 
-  interval: (config) -> ->
-    thinkspeak.get config.channel, 10, (response) ->
-      if config.context.state.title != response.channel.name
-        config.context.setState { title: response.channel.name }
-      nv.drawChart config.svgNode, response, nv.lineChart
+  interval: (config) -> 
+    ->
+      thinkspeak.get config.channel, 10, (response) ->
+        if config.context.state.title != response.channel.name
+          config.context.setState { title: response.channel.name }
+        nv.drawChart config.svgNode, response, config.chart 
 
   render: ->
     <div className="visualisation">
@@ -39,9 +41,9 @@ Main = React.createClass
 
   render: ->
     <div className="container">
-      <ChannelLineGraph channel={35686}/>
-      <ChannelLineGraph channel={35687}/>
-      <ChannelLineGraph channel={35688}/>
+      <ChannelGraph channel={35686} chartType="historicalBarChart"/>
+      <ChannelGraph channel={35687} chartType="historicalBarChart"/>
+      <ChannelGraph channel={35688} chartType="lineChart"/>
     </div>
 
 
