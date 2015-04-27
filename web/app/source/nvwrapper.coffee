@@ -6,6 +6,9 @@ require 'nvd3/build/nv.d3.js'
 parseDateStr = d3.time.format.utc('%Y-%m-%dT%H:%M:%SZ').parse
 
 
+__TS_FIELDS = do ((n) -> ('field' + n) for n in [1..8])
+
+
 getColor = (name) ->
   switch name
     when 'Charcoal' then '#36454f'
@@ -28,7 +31,7 @@ exports.getChartOfType = (target, name) ->
       chart.x (d) -> d.label
       chart.y (d) -> d.value
       chart.yAxis.axisLabel('Temp (C)')
-      chart.xAxis.axisLabel('Roof Color') 
+      chart.xAxis.axisLabel('Roof Color')
       chart.color (d) -> getColor d.label
       nv.utils.windowResize(chart.update)
       new BarChartDrawer target, chart
@@ -52,20 +55,17 @@ exports.getChartOfType = (target, name) ->
 
 
 ChartDrawer = class ChartDrawer
-  
 
   redraw: (data) ->
     d3.select(@target).datum(data).call @chart
 
   withinCapacity: (n) -> n
 
-  __TS_FIELDS: do ((n) -> ('field' + n) for n in [1..8])
-  
   constructor: (@target, @chart) ->
     @oldlast = 0
 
   __structure: (data) ->
-    for f in @__TS_FIELDS
+    for f in __TS_FIELDS
       key: data.channel[f]
       values:
         (x: parseDateStr(d.created_at), y: parseFloat(d[f]) for d in data.feeds)
@@ -81,19 +81,18 @@ ChartDrawer = class ChartDrawer
 
 BarChartDrawer = class BarChartDrawer extends ChartDrawer
 
-  withinCapacity: (n) -> 1
+  withinCapacity: -> 1
 
   __structure: (data) ->
     newData = [{ key: 'all', values: []}]
     for attribute in super data
-      newData[0].values.push 
-        label: attribute.key 
+      newData[0].values.push
+        label: attribute.key
         value: attribute.values[0].y
     return newData
 
   drawChart: (data) ->
     newdata = @__structure(data)
-    console.log newdata
     @redraw newdata
 
 
@@ -102,29 +101,58 @@ EggChartDrawer = class EggChartDrawer
   constructor: (target) ->
     @svg = d3.select(target)
 
+  withinCapacity: -> 1
+
+  #
+  # TODO combine __format_layer_2 & __format_layer_1 into a sensible function
+  #
+
+  parsePx: (s) ->
+    parseInt s.substr(0, s.length - 2), 10
+
   __format_layer_2: (data) ->
-    for f in @__TS_FIELDS
+    for f in __TS_FIELDS
       key: data.channel[f]
       values:
         (x: parseDateStr(d.created_at), y: parseFloat(d[f]) for d in data.feeds)
 
   __format_layer_1: (data) ->
     newData = [{ key: 'all', values: []}]
-    for attribute in super data
-      newData[0].values.push 
-        label: attribute.key 
+    console.log data
+    for attribute in @__format_layer_2 data
+      newData[0].values.push
+        label: attribute.key
         value: attribute.values[0].y
-    return newData
+    return newData[0].values
 
   drawChart: (data) ->
     formatted = @__format_layer_1 data
-    @svg.selectAll('circle')
-        .data(formatted)
-      .enter().append('circle')
-        .attr "cx", svg.attr('height') / 2
-        .attr "cx", (d, i) ->
-          i * (svg.attr('width') / formatted[0].values.length)
-        .attr "r", svg.attr('height') / 2 
+
+    circle = @svg.selectAll('image').data(formatted)
+    text = @svg.selectAll('text').data(formatted)
+
+    radius = @parsePx(@svg.style('height')) / 4.75
+    width = @parsePx(@svg.style 'width') - radius*3
+
+    circle.enter().append('image')
+      .attr "y", (@parsePx(@svg.style('height')) / 2) - radius
+      .attr "x", (d, i) =>
+        (radius*1.5 + (i * (width / (formatted.length-1)))) - radius
+      .attr "width", radius * 2
+      .attr "height", radius * 2
+      .attr "xlink:href","http://www.cs.utah.edu/~maljovec/CS6640/project4/images/checker32-seg.gif" 
+      .style "", radius
+
+    text.enter().append('text')
+      .attr "y", @parsePx(@svg.style('height')) * 8
+      .attr "x", (d, i) =>
+        (radius*1.5 + (i * (width / (formatted.length-1)))) - radius
+      .attr("font-family", "sans-serif")
+      .attr("font-size", "20px")
+      .attr("fill", "red")
+      .text (d) -> d.label
+
+    circle.exit().remove()
 
 
 
