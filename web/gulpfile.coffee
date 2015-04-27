@@ -6,6 +6,7 @@ mustache = require 'gulp-mustache'
 browserify = require 'gulp-browserify'
 sourcemaps = require 'gulp-sourcemaps'
 livereload = require 'gulp-livereload'
+ghPages = require 'gulp-gh-pages'
 
 
 config =
@@ -70,4 +71,6 @@ gulp.task 'watch', ['build'], ->
   gulp.watch config.image.files, ['image-build']
   gulp.watch config.html.files, ['document-build']
 
-
+gulp.task 'deploy', ['build'], ->
+  gulp.src "#{config.other.outdir}/**/*"
+    .pipe(ghPages());
