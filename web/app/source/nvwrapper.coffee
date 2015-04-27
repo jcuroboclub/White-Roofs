@@ -24,16 +24,29 @@ getNvChart = (name) ->
 
 exports.getChartOfType = (target, name) ->
   switch name
+    when "egg"
+      chartj
     when "roof"
       chart = nv.models['discreteBarChart']()
+      chart.showValues true
       chart.xAxis.axisLabel('Roof Color').tickFormat (d) -> d
       chart.yAxis.axisLabel('Temp (C)').tickFormat d3.format('.1f')
+      chart.color (d) ->
+        switch d.x
+          when 'Charcoal' then '#36454f'
+          when 'Ultra White' then '#ddd'
+          when 'Steel Blue' then '#4682b4'
+          when 'White' then '#ccc'
+          when 'Creme' then '#FFFFCC'
+          when 'Desert Red' then '#B6571D'
+          when 'Bone White' then '#E1D4C0'
+          when 'Forest Green' then '#228b22'
       nv.utils.windowResize(chart.update)
       new BarChartDrawer target, chart
     else 
       chart = nv.models[name]()
       if chart.useInteractiveGuideline?
-        chart = chart.useInteractiveGuideline(true)
+        chart.useInteractiveGuideline(true)
       chart.xAxis.axisLabel('Time').tickFormat (d) -> d3.time.format('%H:%M') new Date(d)
       chart.yAxis.axisLabel('Temp (C)').tickFormat d3.format('.1f')
       nv.utils.windowResize(chart.update)
