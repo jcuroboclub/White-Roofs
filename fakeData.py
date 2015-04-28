@@ -6,6 +6,7 @@ from pprint import pprint
 
 API_KEY = ["H671BFO41N0TP246", "VJEFXKQ0AE4LD80D", "QPHVEZKYTKYNXOQZ"]
 n_spine = [8, 8, 1]
+means = [65, 55, 60, 58, 52, 60, 70, 50]
 fields = list(map(lambda x: "field"+x, map(str, range(1, 9))))
 headers = {"Content-type": "application/x-www-form-urlencoded",
            "Accept": "text/plain"}
@@ -15,13 +16,14 @@ def main():
     while True:
         for dt in period:
             for n, key in zip(n_spine, API_KEY):
-                sensors = np.cos(period+dt)*5 + 25
+                sensors = np.cos(period+dt)*1 + means + np.random.rand(1, 8)[0]
                 data = dict(zip(fields, sensors))
                 data["key"] = key
                 params = urllib.parse.urlencode(data)
                 conn = http.client.HTTPConnection("api.thingspeak.com:80")
                 conn.request("POST", "/update", params, headers)
                 response = conn.getresponse()
+                pprint(data)
                 print(response.status, response.reason)
                 conn.close()
                 time.sleep(16/len(API_KEY))
