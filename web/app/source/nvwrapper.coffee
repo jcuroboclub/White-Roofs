@@ -143,12 +143,12 @@ EggChartDrawer = class EggChartDrawer
         # eggcellent
         #
         switch
-          when d.value > 75 then '/img/egg1.png'
-          when d.value > 72 then '/img/egg2.png'
-          when d.value > 68 then '/img/egg3.png'
-          when d.value > 64 then '/img/egg4.png'
-          when d.value > 60 then '/img/egg5.png'
-          else '/img/egg6.png'
+          when d.value > 75 then './img/egg1.png'
+          when d.value > 72 then './img/egg2.png'
+          when d.value > 68 then './img/egg3.png'
+          when d.value > 64 then './img/egg4.png'
+          when d.value > 60 then './img/egg5.png'
+          else './img/egg6.png'
 
 
     text.enter().append('text')
