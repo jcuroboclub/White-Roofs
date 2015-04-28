@@ -55,7 +55,7 @@ ChannelGraph = React.createClass({
 Main = React.createClass({
   render: function() {
     var rawMarkup;
-    rawMarkup = marked("# White Roofs\nWhite Roofs project under development. A joint initiative between [JCU eResearch](https://eresearch.jcu.edu.au), [Townsville City Council](http://www.townsville.qld.gov.au/) and [JCU Robo Club](http://robotics.jcu.io).", {
+    rawMarkup = marked("# White Roofs\nTCC White Roofs project, proof of concept under development. A joint project between [JCU eResearch](https://eresearch.jcu.edu.au), [Townsville City Council](http://www.townsville.qld.gov.au/) and [JCU Robo Club](http://robotics.jcu.io).", {
       sanitize: true
     });
     return React.createElement("div", {
