@@ -124,10 +124,25 @@ EggChartDrawer = class EggChartDrawer
       value: (parseFloat(d[f]) for d in data.feeds)[0]
 
   drawChart: (data) ->
+    @svg.append('text')
+      .text 'Would it cook an egg?'
+      .attr 'x', 0
+      .attr 'y', 20
+
+    @svg.append('text')
+        .text "Source: "
+        .attr 'x', 0
+        .attr 'y', (@__parsePx(@svg.style('height')) - 5)
+        .attr 'style', 'font-size:12px'
+      .append 'a'
+        .text "The Food Lab's Guide to Slow-Cooked, Sous-Vide-Style Eggs"
+        .attr "xlink:href"
+        , "http://www.seriouseats.com/2013/10/sous-vide-101-all-about-eggs.html"
+
     formatted = @__structure data
 
     circle = @svg.selectAll('image').data(formatted)
-    text   = @svg.selectAll('text').data(formatted)
+    text   = @svg.selectAll('#label').data(formatted)
 
     radius = @__parsePx(@svg.style('height')) / 4.75
     width  = @__parsePx(@svg.style 'width') - radius*3
@@ -143,22 +158,22 @@ EggChartDrawer = class EggChartDrawer
         # eggcellent
         #
         switch
-          when d.value > 75 then './img/egg1.png'
-          when d.value > 72 then './img/egg2.png'
-          when d.value > 68 then './img/egg3.png'
-          when d.value > 64 then './img/egg4.png'
-          when d.value > 60 then './img/egg5.png'
-          else './img/egg6.png'
+          when d.value > 73.9 then './img/egg1.png'
+          when d.value > 71.1 then './img/egg2.png'
+          when d.value > 68.3 then './img/egg3.png'
+          when d.value > 65.6 then './img/egg4.png'
+          when d.value > 62.8 then './img/egg5.png'
+          when d.value > 60.0 then './img/egg6.png'
+          when d.value > 57.2 then './img/egg7.png'
+          else                     './img/egg8.png'
 
 
     text.enter().append('text')
+      .attr 'class', 'label'
       .attr "y", @__parsePx(@svg.style('height')) * 0.8
       .attr "x", (d, i) =>
         radius * 1.5 + (i * (width / (formatted.length-1)))
-      .attr("font-family", "PT Sans")
-      .attr("font-size", "16px")
       .attr("text-anchor", 'middle')
-      .attr("fill", "#333")
       .text (d) -> d.label
 
     circle.exit().remove()
