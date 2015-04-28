@@ -43,13 +43,11 @@ Main = React.createClass
   render: ->
     <div className="container">
       <ChannelGraph channel={35686} chartType="egg"/>
-
       <ChannelGraph channel={35686} chartType="roofBarChart"/>
       <ChannelGraph channel={35686} chartType="roofLineChart"/>
       <ChannelGraph channel={35687} chartType="roofBarChart"/>
       <ChannelGraph channel={35687} chartType="roofLineChart"/>
       <ChannelGraph channel={35688} chartType="lineChart"/>
-
     </div>
 
 
