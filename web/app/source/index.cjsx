@@ -44,7 +44,9 @@ Main = React.createClass
   render: ->
     rawMarkup = marked """
                        # White Roofs
-                       White Roofs project under development. A joint initiative between [JCU eResearch](https://eresearch.jcu.edu.au), [Townsville City Council](http://www.townsville.qld.gov.au/) and [JCU Robo Club](http://robotics.jcu.io).
+                       *Monitoring the effect of roof colour on temperature*
+                       
+                       TCC White Roofs project, proof of concept under development. A joint project between [JCU eResearch](https://eresearch.jcu.edu.au), [Townsville City Council](http://www.townsville.qld.gov.au/) and [JCU Robo Club](http://robotics.jcu.io).
                        """
     , {sanitize: true}
     <div className="container">
