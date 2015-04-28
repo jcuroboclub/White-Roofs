@@ -1,6 +1,7 @@
 # @cjsx React.DOM
 React = require 'react'
 $ = require 'jquery'
+marked = require 'marked'
 
 
 thinkspeak = require './thinkspeak'
@@ -32,7 +33,7 @@ ChannelGraph = React.createClass
 
   render: ->
     <div className="visualisation">
-      <h1>{@state.title}</h1>
+      <h2>{@state.title}</h2>
       <svg className="chart" ref="visualisation"/>
     </div>
 
@@ -41,7 +42,13 @@ ChannelGraph = React.createClass
 Main = React.createClass
 
   render: ->
+    rawMarkup = marked """
+                       # White Roofs
+                       White Roofs project under development. A joint initiative between [JCU eResearch](https://eresearch.jcu.edu.au), [Townsville City Council](http://www.townsville.qld.gov.au/) and [JCU Robo Club](http://robotics.jcu.io).
+                       """
+    , {sanitize: true}
     <div className="container">
+      <span dangerouslySetInnerHTML={{__html: rawMarkup}} />
       <ChannelGraph channel={35686} chartType="egg"/>
       <ChannelGraph channel={35686} chartType="roofBarChart"/>
       <ChannelGraph channel={35686} chartType="roofLineChart"/>
