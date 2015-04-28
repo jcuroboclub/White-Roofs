@@ -302,9 +302,11 @@ EggChartDrawer = EggChartDrawer = (function() {
 
   EggChartDrawer.prototype.drawChart = function(data) {
     var circle, formatted, radius, text, width;
+    this.svg.append('text').text('Would it cook an egg?').attr('x', 0).attr('y', 20);
+    this.svg.append('text').text("Source: ").attr('x', 0).attr('y', this.__parsePx(this.svg.style('height')) - 5).attr('style', 'font-size:12px').append('a').text("The Food Lab's Guide to Slow-Cooked, Sous-Vide-Style Eggs").attr("xlink:href", "http://www.seriouseats.com/2013/10/sous-vide-101-all-about-eggs.html");
     formatted = this.__structure(data);
     circle = this.svg.selectAll('image').data(formatted);
-    text = this.svg.selectAll('text').data(formatted);
+    text = this.svg.selectAll('#label').data(formatted);
     radius = this.__parsePx(this.svg.style('height')) / 4.75;
     width = this.__parsePx(this.svg.style('width')) - radius * 3;
     circle.enter().append('image').attr("y", (this.__parsePx(this.svg.style('height')) / 2) - (radius * 1.25)).attr("x", (function(_this) {
@@ -313,25 +315,29 @@ EggChartDrawer = EggChartDrawer = (function() {
       };
     })(this)).attr("width", radius * 2).attr("height", radius * 2).attr("xlink:href", function(d) {
       switch (false) {
-        case !(d.value > 75):
+        case !(d.value > 73.9):
           return './img/egg1.png';
-        case !(d.value > 72):
+        case !(d.value > 71.1):
           return './img/egg2.png';
-        case !(d.value > 68):
+        case !(d.value > 68.3):
           return './img/egg3.png';
-        case !(d.value > 64):
+        case !(d.value > 65.6):
           return './img/egg4.png';
-        case !(d.value > 60):
+        case !(d.value > 62.8):
           return './img/egg5.png';
-        default:
+        case !(d.value > 60.0):
           return './img/egg6.png';
+        case !(d.value > 57.2):
+          return './img/egg7.png';
+        default:
+          return './img/egg8.png';
       }
     });
-    text.enter().append('text').attr("y", this.__parsePx(this.svg.style('height')) * 0.8).attr("x", (function(_this) {
+    text.enter().append('text').attr('class', 'label').attr("y", this.__parsePx(this.svg.style('height')) * 0.8).attr("x", (function(_this) {
       return function(d, i) {
         return radius * 1.5 + (i * (width / (formatted.length - 1)));
       };
-    })(this)).attr("font-family", "PT Sans").attr("font-size", "16px").attr("text-anchor", 'middle').attr("fill", "#333").text(function(d) {
+    })(this)).attr("text-anchor", 'middle').text(function(d) {
       return d.label;
     });
     return circle.exit().remove();
