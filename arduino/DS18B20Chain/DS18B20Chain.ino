@@ -1,7 +1,18 @@
+// Code for the TCC White Roofs project.
+// Collects temperatures from DS18B20 sensors. The sensors are arranged in
+// two main daisy chains: one with 8 sensors and one with 9. There is also
+// one extra sensor also.
+// Designed to relay data as CSV over USB Serial to a Pi.
+//
+// Designed by Febrio Lunardo and Ashley Gillman
+//
+// Useful reference:
+// https://arduino-info.wikispaces.com/Brick-Temperature-DS18B20
+
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
-#define DEBUG 1
+#define DEBUG 0 // Useful for gaining sensor addresses, set to 1.
 
 #define BUS_1 2
 #define BUS_2 3
@@ -35,8 +46,8 @@ DeviceAddress d2_4 = { 0x28, 0xA9, 0x6F, 0x82, 0x04, 0x00, 0x00, 0xEA };
 DeviceAddress d2_5 = { 0x28, 0x19, 0x74, 0x82, 0x04, 0x00, 0x00, 0xE1 };
 DeviceAddress d2_6 = { 0x28, 0xA8, 0x78, 0x82, 0x04, 0x00, 0x00, 0xF0 };
 DeviceAddress d2_7 = { 0x28, 0xAD, 0x8F, 0x82, 0x04, 0x00, 0x00, 0xEC };
-DeviceAddress d2_8 = { 0x28, 0x55, 0xA5, 0x82, 0x04, 0x00, 0x00, 0x7A };
 
+// formulate each address group into a convenient array
 void assignAddresses() {
   bus1Devs[0] = &d1_0;
   bus1Devs[1] = &d1_1;
@@ -59,15 +70,16 @@ void assignAddresses() {
 }
 
 void setup() {
+  // Begin
   Serial.begin(9600);
   assignAddresses();
   dallas1.begin();
   dallas2.begin();
   
+  // Get the addresses of connected devices.
   if (DEBUG) {
     Serial.println("Beginning.");
-    Serial.print("Locating devices on ch. 1...");
-    Serial.print("Found ");
+    Serial.print("Locating devices on ch. 1... Found ");
     Serial.print(dallas1.getDeviceCount(), DEC);
     Serial.println(" devices.");
     
@@ -83,8 +95,7 @@ void setup() {
       }
     }
     
-    Serial.print("Locating devices on ch. 2...");
-    Serial.print("Found ");
+    Serial.print("Locating devices on ch. 2... Found ");
     Serial.print(dallas2.getDeviceCount(), DEC);
     Serial.println(" devices.");
     
@@ -103,8 +114,9 @@ void setup() {
 
 void loop() {
   assignAddresses(); // Unsure why we have to do this every time, but we do
-  dallas1.requestTemperatures(); // Update temperatures
-  dallas2.requestTemperatures(); // Update temperatures
+  // Update temperature readings
+  dallas1.requestTemperatures();
+  dallas2.requestTemperatures();
   
   // Print comma separated temperatures
   for (int i=0; i<N_BUS_1; ++i) {
@@ -130,10 +142,11 @@ void loop() {
   
   // end line, wait
   Serial.println();
-  delay(2000);
+  delay(15*1000);
 }
 
-// function to print a device address
+// print a device address in format that can be copy pasted
+// to the definitions at the beginning.
 void printAddress(DeviceAddress deviceAddress)
 {
   for (uint8_t i = 0; i < 8; i++)
