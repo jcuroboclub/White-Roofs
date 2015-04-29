@@ -1,0 +1,147 @@
+#include <OneWire.h>
+#include <DallasTemperature.h>
+
+#define DEBUG 1
+
+#define BUS_1 2
+#define BUS_2 3
+#define PRECISION 9
+
+OneWire wire1(BUS_1);
+OneWire wire2(BUS_2);
+DallasTemperature dallas1(&wire1);
+DallasTemperature dallas2(&wire2);
+
+#define N_BUS_1 9
+#define N_BUS_2 8
+DeviceAddress* bus1Devs[N_BUS_1];
+DeviceAddress* bus2Devs[N_BUS_2];
+
+DeviceAddress d1_0 = { 0x28, 0x58, 0x1C, 0x82, 0x04, 0x00, 0x00, 0x8C };
+DeviceAddress d1_1 = { 0x28, 0x77, 0xBB, 0x82, 0x04, 0x00, 0x00, 0x7C };
+DeviceAddress d1_2 = { 0x28, 0x6A, 0x8B, 0x82, 0x04, 0x00, 0x00, 0xE9 };
+DeviceAddress d1_3 = { 0x28, 0x09, 0x00, 0x82, 0x04, 0x00, 0x00, 0xC8 };
+DeviceAddress d1_4 = { 0x28, 0xA9, 0x6F, 0x82, 0x04, 0x00, 0x00, 0xEA };
+DeviceAddress d1_5 = { 0x28, 0x19, 0x74, 0x82, 0x04, 0x00, 0x00, 0xE1 };
+DeviceAddress d1_6 = { 0x28, 0xA8, 0x78, 0x82, 0x04, 0x00, 0x00, 0xF0 };
+DeviceAddress d1_7 = { 0x28, 0xAD, 0x8F, 0x82, 0x04, 0x00, 0x00, 0xEC };
+DeviceAddress d1_8 = { 0x28, 0x55, 0xA5, 0x82, 0x04, 0x00, 0x00, 0x7A };
+
+DeviceAddress d2_0 = { 0x28, 0x58, 0x1C, 0x82, 0x04, 0x00, 0x00, 0x8C };
+DeviceAddress d2_1 = { 0x28, 0x77, 0xBB, 0x82, 0x04, 0x00, 0x00, 0x7C };
+DeviceAddress d2_2 = { 0x28, 0x6A, 0x8B, 0x82, 0x04, 0x00, 0x00, 0xE9 };
+DeviceAddress d2_3 = { 0x28, 0x09, 0x00, 0x82, 0x04, 0x00, 0x00, 0xC8 };
+DeviceAddress d2_4 = { 0x28, 0xA9, 0x6F, 0x82, 0x04, 0x00, 0x00, 0xEA };
+DeviceAddress d2_5 = { 0x28, 0x19, 0x74, 0x82, 0x04, 0x00, 0x00, 0xE1 };
+DeviceAddress d2_6 = { 0x28, 0xA8, 0x78, 0x82, 0x04, 0x00, 0x00, 0xF0 };
+DeviceAddress d2_7 = { 0x28, 0xAD, 0x8F, 0x82, 0x04, 0x00, 0x00, 0xEC };
+DeviceAddress d2_8 = { 0x28, 0x55, 0xA5, 0x82, 0x04, 0x00, 0x00, 0x7A };
+
+void assignAddresses() {
+  bus1Devs[0] = &d1_0;
+  bus1Devs[1] = &d1_1;
+  bus1Devs[2] = &d1_2;
+  bus1Devs[3] = &d1_3;
+  bus1Devs[4] = &d1_4;
+  bus1Devs[5] = &d1_5;
+  bus1Devs[6] = &d1_6;
+  bus1Devs[7] = &d1_7;
+  bus1Devs[8] = &d1_8;
+  
+  bus2Devs[0] = &d2_0;
+  bus2Devs[1] = &d2_1;
+  bus2Devs[2] = &d2_2;
+  bus2Devs[3] = &d2_3;
+  bus2Devs[4] = &d2_4;
+  bus2Devs[5] = &d2_5;
+  bus2Devs[6] = &d2_6;
+  bus2Devs[7] = &d2_7;
+}
+
+void setup() {
+  Serial.begin(9600);
+  assignAddresses();
+  dallas1.begin();
+  dallas2.begin();
+  
+  if (DEBUG) {
+    Serial.println("Beginning.");
+    Serial.print("Locating devices on ch. 1...");
+    Serial.print("Found ");
+    Serial.print(dallas1.getDeviceCount(), DEC);
+    Serial.println(" devices.");
+    
+    DeviceAddress tempDev;
+    dallas1.requestTemperatures();
+    for (int i=0; i<dallas1.getDeviceCount(); ++i) {
+      if (!dallas1.getAddress(tempDev, i)) {
+        Serial.print("  Unable to find address for Device ");
+        Serial.println(i);
+      } else {
+        printAddress(tempDev);
+        Serial.println(dallas1.getTempC(tempDev));
+      }
+    }
+    
+    Serial.print("Locating devices on ch. 2...");
+    Serial.print("Found ");
+    Serial.print(dallas2.getDeviceCount(), DEC);
+    Serial.println(" devices.");
+    
+    dallas2.requestTemperatures();
+    for (int i=0; i<dallas2.getDeviceCount(); ++i) {
+      if (!dallas2.getAddress(tempDev, i)) {
+        Serial.print("  Unable to find address for Device ");
+        Serial.println(i);
+      } else {
+        printAddress(tempDev);
+        Serial.println(dallas2.getTempC(tempDev));
+      }
+    }
+  }
+}
+
+void loop() {
+  assignAddresses(); // Unsure why we have to do this every time, but we do
+  dallas1.requestTemperatures(); // Update temperatures
+  dallas2.requestTemperatures(); // Update temperatures
+  
+  // Print comma separated temperatures
+  for (int i=0; i<N_BUS_1; ++i) {
+    float temp = dallas1.getTempC(*bus1Devs[i]);
+    Serial.print(temp);
+    Serial.print(", ");
+  }
+  /*
+  for (int i=0; i<N_BUS_1; ++i) {
+    float temp = dallas2.getTempC(*bus1Devs[i]);
+    Serial.print(temp);
+    Serial.print(", ");
+  }
+  */
+  
+  // DELETE THIS!!
+  // Faking extra data
+  for (int i=0; i<N_BUS_1; ++i) {
+    float temp = dallas1.getTempC(*bus1Devs[i]);
+    Serial.print(temp);
+    Serial.print(", ");
+  }
+  
+  // end line, wait
+  Serial.println();
+  delay(2000);
+}
+
+// function to print a device address
+void printAddress(DeviceAddress deviceAddress)
+{
+  for (uint8_t i = 0; i < 8; i++)
+  {
+    Serial.print("0x");
+    // zero pad the address if necessary
+    if (deviceAddress[i] < 16) Serial.print("0");
+    Serial.print(deviceAddress[i], HEX);
+    Serial.print(", ");
+  }
+}
