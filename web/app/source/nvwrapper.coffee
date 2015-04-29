@@ -105,6 +105,21 @@ EggChartDrawer = class EggChartDrawer
 
   constructor: (target) ->
     @svg = d3.select(target)
+    @svg.append('text')
+      #  .id 'egg-above'
+        .text 'Would it cook an egg?'
+        .attr 'x', 0
+        .attr 'y', 20
+
+    @svg.append('text')
+        .text "Source: "
+        .attr 'x', 0
+        .attr 'y', (@__parsePx(@svg.style('height')) - 5)
+        .attr 'style', 'font-size:12px'
+      .append 'a'
+        .text "The Food Lab's Guide to Slow-Cooked, Sous-Vide-Style Eggs"
+        .attr "xlink:href"
+        , "http://www.seriouseats.com/2013/10/sous-vide-101-all-about-eggs.html"
 
   #
   # because the bar chart only wants 1 row, it doesn't
@@ -124,21 +139,6 @@ EggChartDrawer = class EggChartDrawer
       value: (parseFloat(d[f]) for d in data.feeds)[0]
 
   drawChart: (data) ->
-    @svg.append('text')
-      .text 'Would it cook an egg?'
-      .attr 'x', 0
-      .attr 'y', 20
-
-    @svg.append('text')
-        .text "Source: "
-        .attr 'x', 0
-        .attr 'y', (@__parsePx(@svg.style('height')) - 5)
-        .attr 'style', 'font-size:12px'
-      .append 'a'
-        .text "The Food Lab's Guide to Slow-Cooked, Sous-Vide-Style Eggs"
-        .attr "xlink:href"
-        , "http://www.seriouseats.com/2013/10/sous-vide-101-all-about-eggs.html"
-
     formatted = @__structure data
 
     circle = @svg.selectAll('image').data(formatted)
@@ -169,7 +169,7 @@ EggChartDrawer = class EggChartDrawer
 
 
     text.enter().append('text')
-      .attr 'class', 'label'
+      .attr 'id', 'label'
       .attr "y", @__parsePx(@svg.style('height')) * 0.8
       .attr "x", (d, i) =>
         radius * 1.5 + (i * (width / (formatted.length-1)))
@@ -177,8 +177,3 @@ EggChartDrawer = class EggChartDrawer
       .text (d) -> d.label
 
     circle.exit().remove()
-
-
-
-
-
