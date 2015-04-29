@@ -200,22 +200,24 @@ ChartDrawer = ChartDrawer = (function() {
     results = [];
     for (j = 0, len = __TS_FIELDS.length; j < len; j++) {
       f = __TS_FIELDS[j];
-      results.push({
-        key: data.channel[f],
-        values: (function() {
-          var k, len1, ref, results1;
-          ref = data.feeds;
-          results1 = [];
-          for (k = 0, len1 = ref.length; k < len1; k++) {
-            d = ref[k];
-            results1.push({
-              x: parseDateStr(d.created_at),
-              y: parseFloat(d[f])
-            });
-          }
-          return results1;
-        })()
-      });
+      if (data.channel[f] != null) {
+        results.push({
+          key: data.channel[f],
+          values: (function() {
+            var k, len1, ref, results1;
+            ref = data.feeds;
+            results1 = [];
+            for (k = 0, len1 = ref.length; k < len1; k++) {
+              d = ref[k];
+              results1.push({
+                x: parseDateStr(d.created_at),
+                y: parseFloat(d[f])
+              });
+            }
+            return results1;
+          })()
+        });
+      }
     }
     return results;
   };
@@ -223,7 +225,7 @@ ChartDrawer = ChartDrawer = (function() {
   ChartDrawer.prototype.drawChart = function(data) {
     var field1, last, newdata;
     newdata = this.__structure(data);
-    field1 = newdata[1];
+    field1 = newdata[0];
     last = field1.values[field1.values.length - 1];
     if (last !== this.oldlast) {
       this.oldlast = last;
@@ -278,6 +280,8 @@ BarChartDrawer = BarChartDrawer = (function(superClass) {
 EggChartDrawer = EggChartDrawer = (function() {
   function EggChartDrawer(target) {
     this.svg = d3.select(target);
+    this.svg.append('text').text('Would it cook an egg?').attr('x', 0).attr('y', 20);
+    this.svg.append('text').text("Source: ").attr('x', 0).attr('y', this.__parsePx(this.svg.style('height')) - 5).attr('style', 'font-size:12px').append('a').text("The Food Lab's Guide to Slow-Cooked, Sous-Vide-Style Eggs").attr("xlink:href", "http://www.seriouseats.com/2013/10/sous-vide-101-all-about-eggs.html");
   }
 
   EggChartDrawer.prototype.withinCapacity = function() {
@@ -312,8 +316,6 @@ EggChartDrawer = EggChartDrawer = (function() {
 
   EggChartDrawer.prototype.drawChart = function(data) {
     var circle, formatted, radius, text, width;
-    this.svg.append('text').text('Would it cook an egg?').attr('x', 0).attr('y', 20);
-    this.svg.append('text').text("Source: ").attr('x', 0).attr('y', this.__parsePx(this.svg.style('height')) - 5).attr('style', 'font-size:12px').append('a').text("The Food Lab's Guide to Slow-Cooked, Sous-Vide-Style Eggs").attr("xlink:href", "http://www.seriouseats.com/2013/10/sous-vide-101-all-about-eggs.html");
     formatted = this.__structure(data);
     circle = this.svg.selectAll('image').data(formatted);
     text = this.svg.selectAll('#label').data(formatted);
@@ -343,7 +345,7 @@ EggChartDrawer = EggChartDrawer = (function() {
           return './img/egg8.png';
       }
     });
-    text.enter().append('text').attr('class', 'label').attr("y", this.__parsePx(this.svg.style('height')) * 0.8).attr("x", (function(_this) {
+    text.enter().append('text').attr('id', 'label').attr("y", this.__parsePx(this.svg.style('height')) * 0.8).attr("x", (function(_this) {
       return function(d, i) {
         return radius * 1.5 + (i * (width / (formatted.length - 1)));
       };
