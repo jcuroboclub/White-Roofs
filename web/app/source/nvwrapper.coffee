@@ -66,14 +66,14 @@ ChartDrawer = class ChartDrawer
   withinCapacity: (n) -> n
 
   __structure: (data) ->
-    for f in __TS_FIELDS
+    for f in __TS_FIELDS when data.channel[f]?
       key: data.channel[f]
       values:
         (x: parseDateStr(d.created_at), y: parseFloat(d[f]) for d in data.feeds)
 
   drawChart: (data) ->
     newdata = @__structure(data)
-    field1 = newdata[1]
+    field1 = newdata[0]
     last = field1.values[field1.values.length-1]
     if last isnt @oldlast # if updated
       @oldlast = last
