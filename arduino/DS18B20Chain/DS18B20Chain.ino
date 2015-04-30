@@ -12,23 +12,32 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
-#define DEBUG 0 // Useful for gaining sensor addresses, set to 1.
+#define DEBUG 1 // Useful for gaining sensor addresses, set to 1.
 
-#define BUS_1 2
-#define BUS_2 3
+#define BUS_0 2 // Indoor
+#define BUS_1 3 // Green Roofs
+#define BUS_2 4 // Brown Inner + Outdoor
 #define PRECISION 9
 
+OneWire wire0(BUS_0);
 OneWire wire1(BUS_1);
 OneWire wire2(BUS_2);
+DallasTemperature dallas0(&wire0);
 DallasTemperature dallas1(&wire1);
 DallasTemperature dallas2(&wire2);
 
+#define N_BUS_0 1
 #define N_BUS_1 9
 #define N_BUS_2 8
+DeviceAddress* bus0Devs[N_BUS_0];
 DeviceAddress* bus1Devs[N_BUS_1];
 DeviceAddress* bus2Devs[N_BUS_2];
 
-DeviceAddress d1_0 = { 0x28, 0x58, 0x1C, 0x82, 0x04, 0x00, 0x00, 0x8C };
+// Indoor
+DeviceAddress d0_0 = { 0x28, 0x55, 0xA5, 0x82, 0x04, 0x00, 0x00, 0x7A };
+
+// Roofs - Green
+DeviceAddress d1_0 = { 0x28, 0x49, 0x82, 0x82, 0x04, 0x00, 0x00, 0xF5 }; // Note: none of these are yet correct.
 DeviceAddress d1_1 = { 0x28, 0x77, 0xBB, 0x82, 0x04, 0x00, 0x00, 0x7C };
 DeviceAddress d1_2 = { 0x28, 0x6A, 0x8B, 0x82, 0x04, 0x00, 0x00, 0xE9 };
 DeviceAddress d1_3 = { 0x28, 0x09, 0x00, 0x82, 0x04, 0x00, 0x00, 0xC8 };
@@ -36,10 +45,12 @@ DeviceAddress d1_4 = { 0x28, 0xA9, 0x6F, 0x82, 0x04, 0x00, 0x00, 0xEA };
 DeviceAddress d1_5 = { 0x28, 0x19, 0x74, 0x82, 0x04, 0x00, 0x00, 0xE1 };
 DeviceAddress d1_6 = { 0x28, 0xA8, 0x78, 0x82, 0x04, 0x00, 0x00, 0xF0 };
 DeviceAddress d1_7 = { 0x28, 0xAD, 0x8F, 0x82, 0x04, 0x00, 0x00, 0xEC };
-DeviceAddress d1_8 = { 0x28, 0x55, 0xA5, 0x82, 0x04, 0x00, 0x00, 0x7A };
+// Outdoor - Orange
+DeviceAddress d1_8 = { 0x28, 0xAD, 0x8F, 0x82, 0x04, 0x00, 0x00, 0xEC };
 
-DeviceAddress d2_0 = { 0x28, 0x58, 0x1C, 0x82, 0x04, 0x00, 0x00, 0x8C };
-DeviceAddress d2_1 = { 0x28, 0x77, 0xBB, 0x82, 0x04, 0x00, 0x00, 0x7C };
+// Inner - Brown
+DeviceAddress d2_0 = { 0x28, 0xAD, 0x8F, 0x82, 0x04, 0x00, 0x00, 0xEC };
+DeviceAddress d2_1 = { 0x28, 0x09, 0x00, 0x82, 0x04, 0x00, 0x00, 0xC8 };
 DeviceAddress d2_2 = { 0x28, 0x6A, 0x8B, 0x82, 0x04, 0x00, 0x00, 0xE9 };
 DeviceAddress d2_3 = { 0x28, 0x09, 0x00, 0x82, 0x04, 0x00, 0x00, 0xC8 };
 DeviceAddress d2_4 = { 0x28, 0xA9, 0x6F, 0x82, 0x04, 0x00, 0x00, 0xEA };
@@ -49,6 +60,8 @@ DeviceAddress d2_7 = { 0x28, 0xAD, 0x8F, 0x82, 0x04, 0x00, 0x00, 0xEC };
 
 // formulate each address group into a convenient array
 void assignAddresses() {
+  bus0Devs[0] = &d0_0;
+  
   bus1Devs[0] = &d1_0;
   bus1Devs[1] = &d1_1;
   bus1Devs[2] = &d1_2;
@@ -57,7 +70,7 @@ void assignAddresses() {
   bus1Devs[5] = &d1_5;
   bus1Devs[6] = &d1_6;
   bus1Devs[7] = &d1_7;
-  bus1Devs[8] = &d1_8;
+  bus2Devs[8] = &d1_8;
   
   bus2Devs[0] = &d2_0;
   bus2Devs[1] = &d2_1;
@@ -73,17 +86,33 @@ void setup() {
   // Begin
   Serial.begin(9600);
   assignAddresses();
+  dallas0.begin();
   dallas1.begin();
   dallas2.begin();
   
   // Get the addresses of connected devices.
   if (DEBUG) {
     Serial.println("Beginning.");
+    Serial.print("Locating devices on ch. 0... Found ");
+    Serial.print(dallas0.getDeviceCount(), DEC);
+    Serial.println(" devices.");
+    
+    DeviceAddress tempDev;
+    dallas0.requestTemperatures();
+    for (int i=0; i<dallas0.getDeviceCount(); ++i) {
+      if (!dallas0.getAddress(tempDev, i)) {
+        Serial.print("  Unable to find address for Device ");
+        Serial.println(i);
+      } else {
+        printAddress(tempDev);
+        Serial.println(dallas0.getTempC(tempDev));
+      }
+    }
+    
     Serial.print("Locating devices on ch. 1... Found ");
     Serial.print(dallas1.getDeviceCount(), DEC);
     Serial.println(" devices.");
     
-    DeviceAddress tempDev;
     dallas1.requestTemperatures();
     for (int i=0; i<dallas1.getDeviceCount(); ++i) {
       if (!dallas1.getAddress(tempDev, i)) {
@@ -94,6 +123,7 @@ void setup() {
         Serial.println(dallas1.getTempC(tempDev));
       }
     }
+    
     
     Serial.print("Locating devices on ch. 2... Found ");
     Serial.print(dallas2.getDeviceCount(), DEC);
@@ -115,27 +145,27 @@ void setup() {
 void loop() {
   assignAddresses(); // Unsure why we have to do this every time, but we do
   // Update temperature readings
+  dallas0.requestTemperatures();
   dallas1.requestTemperatures();
   dallas2.requestTemperatures();
   
-  // Print comma separated temperatures
+  // Roofs
   for (int i=0; i<N_BUS_1; ++i) {
     float temp = dallas1.getTempC(*bus1Devs[i]);
     Serial.print(temp);
     Serial.print(", ");
   }
-  /*
+  
+  // Inners + Outdoor
   for (int i=0; i<N_BUS_1; ++i) {
     float temp = dallas2.getTempC(*bus1Devs[i]);
     Serial.print(temp);
     Serial.print(", ");
   }
-  */
   
-  // DELETE THIS!!
-  // Faking extra data
-  for (int i=0; i<N_BUS_1; ++i) {
-    float temp = dallas1.getTempC(*bus1Devs[i]);
+  // Indoor
+  for (int i=0; i<N_BUS_0; ++i) {
+    float temp = dallas0.getTempC(*bus0Devs[i]);
     Serial.print(temp);
     Serial.print(", ");
   }
