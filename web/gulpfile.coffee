@@ -25,6 +25,7 @@ config =
 
 
 gulp.task 'build', ['source-build', 'style-build', 'document-build', 'image-build']
+gulp.task 'build-prod', ['source-build', 'style-build', 'document-build-prod', 'image-build']
 
 
 gulp.task 'source-build', ->
@@ -57,7 +58,15 @@ gulp.task 'image-build', ->
 gulp.task 'document-build', ->
   gulp.src(config.html.files)
     .pipe mustache
-      isProduction: process.env.ENV == 'PROD'
+      isProduction: false
+    .pipe gulp.dest config.other.outdir
+    .pipe livereload()
+
+
+gulp.task 'document-build-prod', ->
+  gulp.src(config.html.files)
+    .pipe mustache
+      isProduction: true
     .pipe gulp.dest config.other.outdir
     .pipe livereload()
 
@@ -71,6 +80,7 @@ gulp.task 'watch', ['build'], ->
   gulp.watch config.image.files, ['image-build']
   gulp.watch config.html.files, ['document-build']
 
-gulp.task 'deploy', ['build'], ->
+
+gulp.task 'deploy', ['build-prod'], ->
   gulp.src "#{config.other.outdir}/**/*"
     .pipe(ghPages());
