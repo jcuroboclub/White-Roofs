@@ -74,12 +74,6 @@ Main = React.createClass({
       "channel": 35686.,
       "chartType": "roofLineChart"
     }), React.createElement(ChannelGraph, {
-      "channel": 35687.,
-      "chartType": "roofBarChart"
-    }), React.createElement(ChannelGraph, {
-      "channel": 35687.,
-      "chartType": "roofLineChart"
-    }), React.createElement(ChannelGraph, {
       "channel": 35688.,
       "chartType": "lineChart"
     }));
